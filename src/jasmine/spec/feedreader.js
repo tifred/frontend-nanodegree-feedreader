@@ -1,9 +1,7 @@
 // feedreader.js
 
-// Two global vars used to test that new entries and titles are loaded.
-
-var globalFirstFeedEntryText;
-var globalTitle;
+// Jasmine can be slow loading RSS feeds.  This helps avoid errors:
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 
 $(function() {
 
@@ -35,24 +33,24 @@ $(function() {
 
     describe('The Menu', function() {
 
-        var menuLink = $('.menu-icon-link');
-        var menuHidden;
+        var $menuLink = $('.menu-icon-link');
+        var $menuHidden;
 
         it('is hidden at load time', function() {
-            menuHidden = $('body').hasClass('menu-hidden');
-            expect(menuHidden).toBe(true);
+            $menuHidden = $('body').hasClass('menu-hidden');
+            expect($menuHidden).toBe(true);
         });
 
-        // Note that menuHidden must be re-evaluated after each click.
+        // Note that $menuHidden must be re-evaluated after each click.
 
         it('toggles between shown and hidden when menu icon is clicked', function() {
-            menuLink.trigger('click');
-            menuHidden = $('body').hasClass('menu-hidden');
-            expect(menuHidden).not.toBe(true);
+            $menuLink.trigger('click');
+            $menuHidden = $('body').hasClass('menu-hidden');
+            expect($menuHidden).not.toBe(true);
 
-            menuLink.trigger('click');
-            menuHidden = $('body').hasClass('menu-hidden');
-            expect(menuHidden).toBe(true);
+            $menuLink.trigger('click');
+            $menuHidden = $('body').hasClass('menu-hidden');
+            expect($menuHidden).toBe(true);
         });
     });
 
@@ -66,62 +64,69 @@ $(function() {
             loadFeed(0, done);
         });
 
-        it('will return at least one entry that is neither blank nor undefined', function() {
-            var entryCount = $('.feed .entry-link .entry').length
-            var firstFeedEntryText = $('.feed a:first h2').text();
-
-            // Save value to global var for comparison later in "New Feed Selection".
-
-            globalFirstFeedEntryText = firstFeedEntryText;
-
-            expect(entryCount).toBeGreaterThan(0);
-            expect(firstFeedEntryText).toBeDefined();
-            expect(firstFeedEntryText).not.toBe('');
+        it('will return at least one entry that is not blank', function() {
+            var $entryCount = $('.feed .entry-link .entry').length;
+            var $firstFeedEntryText = $('.feed a:first h2').text();
+            expect($entryCount).toBeGreaterThan(0);
+            expect($firstFeedEntryText).not.toBe('');
         });
 
-        it('will return a title for the header that is neither blank nor undefined', function() {
-            var title = $('.header-title').text();
-
-            // Save value to global var for comparison in "New Feed Selection".
-
-            globalTitle = title;
-
-            expect(title).toBeDefined();
-            expect(title).not.toBe('');
+        it('will return a title for the header that is not blank', function() {
+            var $title = $('.header-title').text();
+            expect($title).not.toBe('');
         });
     });
 
-    // Test that entries and title have different content when loadFeed runs again.
+    // Test that entries and title have different content when loadFeed is run on different feeds.
 
     describe('New Feed Selection', function() {
 
+        var $firstFeedEntryText;
+        var $firstTitle;
+        var $secondFeedEntryText;
+        var $secondTitle;
+
         /*
-            Note that loadFeed is an async function. Must use "done" here.
-            Initial loadFeed uses 0, so use 2 this time.
+            Run loadFeed with done, because it is async.
+            Set variables based on output.
         */
 
-        beforeEach(function(done) {
-            loadFeed(2, done);
+        beforeAll(function(done) {
+            loadFeed(0, function() {
+                $firstFeedEntryText = $('.feed a:first h2').text();
+                $firstTitle = $('.header-title').text();
+                done();
+            });
         });
 
-        it('will load new content that is neither blank nor undefined', function(done) {
-            var currentFeedEntryText = $('.feed a:first h2').text();
+        /*
+            Run loadFeed again, but from within another test suite.
+            This ensures that the first loadFeed will be done before this one runs.
+            Otherwise, the two loadFeeds interfere with one another
+            or complete at very different times, making a comparision of values impossible.
+        */
 
-            expect(currentFeedEntryText).toBeDefined();
-            expect(currentFeedEntryText).not.toBe('');
-            expect(currentFeedEntryText).not.toBe(globalFirstFeedEntryText);
+        describe('Compared to Previous Feed Selection', function() {
 
-            done();
-        });
+            beforeAll(function(done) {
+                loadFeed(2, function() {
+                    $secondFeedEntryText = $('.feed a:first h2').text();
+                    $secondTitle = $('.header-title').text();
+                    done();
+                });
+            });
 
-        it('will load a new title that is neither blank nor undefined', function(done) {
-            var newTitle = $('.header-title');
+            it('will load new content that is not blank', function(done) {
+                expect($secondFeedEntryText).not.toBe('');
+                expect($secondFeedEntryText).not.toBe($firstFeedEntryText);
+                done();
+            });
 
-            expect(newTitle).toBeDefined();
-            expect(newTitle).not.toBe('');
-            expect(newTitle).not.toBe(globalTitle);
-
-            done();
+            it('will load a new title that is not blank', function(done) {
+                expect($secondTitle).not.toBe('');
+                expect($secondTitle).not.toBe($firstTitle);
+                done();
+            });
         });
     });
 }());

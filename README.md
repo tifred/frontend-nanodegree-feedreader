@@ -9,11 +9,11 @@
 
   * Should report 9 specs, 0 failures.
   * Should be green.
-  * Should list four suites:
+  * Should list five suites:
   * "RSS Feeds" (with three specs).
   * "The Menu" (with two specs).
   * "Initial Entries" (with two specs).
-  * "New Feed Selection" (with two specs).
+  * "New Feed Selection", with nested "Compared to Previous Feed Selection" (with two specs).
 
 3. Build Environment.
 
