@@ -44,8 +44,7 @@ function init() {
      var feedUrl = allFeeds[id].url,
          feedName = allFeeds[id].name;
 
-     $.ajax({
-       type: "POST",
+     $.ajax({ type: "POST",
        url: 'https://rsstojson.udacity.com/parseFeed',
        data: JSON.stringify({url: feedUrl}),
        contentType:"application/json",
