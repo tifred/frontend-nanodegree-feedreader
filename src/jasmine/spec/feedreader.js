@@ -104,6 +104,18 @@ $(function() {
             This ensures that the first loadFeed will be done before this one runs.
             Otherwise, the two loadFeeds interfere with one another
             or complete at very different times, making a comparision of values impossible.
+
+            An alternative:
+
+            beforeAll(function(done) {
+                 loadFeed(0, function({
+                   $feedA = $('.feed').html();
+                   loadFeed(1, function({
+                     $feedB = $('.feed').html();
+                     done();
+                   }));
+                 }));
+             });
         */
 
         describe('Compared to Previous Feed Selection', function() {
