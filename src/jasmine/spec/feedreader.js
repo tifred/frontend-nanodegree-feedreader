@@ -142,3 +142,7 @@ $(function() {
         });
     });
 }());
+
+// NO jasmineEnv.addReporter(new jasmine.JSReporter());
+// NO jasmineEnv.addReporter(new jasmine.JSReporter2());
+jasmine.getEnv().addReporter(new jasmine.JSReporter2());
